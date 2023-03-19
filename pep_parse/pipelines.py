@@ -16,10 +16,7 @@ class PepParsePipeline:
     def process_item(self, item, spider):
         """Подсчет количества статусов."""
         pep_status = item['status']
-        if self.results.get(pep_status):
-            self.results[pep_status] += 1
-        else:
-            self.results[pep_status] = 1
+        self.results[pep_status] = self.results.get(pep_status, 0) + 1
         return item
 
     def close_spider(self, spider):
@@ -27,7 +24,8 @@ class PepParsePipeline:
         file_dir = self.results_dir / FILE_NAME.format(time=TIME_FORMATED)
         with open(file_dir, mode='w', encoding='utf-8') as f:
             writer = csv.writer(f, dialect='unix')
-            writer.writerow(FIELDS_NAME)
-            for key, val in self.results.items():
-                writer.writerow([key, val])
-            writer.writerow(['Total', sum(self.results.values())])
+            writer.writerows([
+                FIELDS_NAME,
+                *self.results.items(),
+                ('Total', sum(self.results.values())),
+            ])

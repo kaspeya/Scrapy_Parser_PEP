@@ -1,4 +1,5 @@
 import re
+from urllib.parse import urljoin
 
 import scrapy
 
@@ -14,6 +15,7 @@ class PepSpider(scrapy.Spider):
         pep = response.css('section#numerical-index').css('tbody').css('tr')
         for item in pep:
             href = item.css('a::attr(href)').get()
+            urljoin(href, '/')
             if href is not None:
                 yield response.follow(href, callback=self.parse_pep)
 
